@@ -1,0 +1,136 @@
+任务描述：你将被给予一条 JSON 格式的数据，包含一条规则（rule）的描述，这条规则中包含的谓词（predicates），以及根据规则转换而来的逻辑表达式（logicexpression）。你的任务是针对谓词取不同的具体的值，代入逻辑表达式中，其中取值要满足多样性与复杂性，并将实例化的参数值输出为可解析的 JSON 格式。
+------
+下面是一个例子：
+```json
+{
+    "rule": "安全生产协调司的职责：根据安全监管总局领导指示和有关规定，组织协调安全监察专员赶赴事故现场参与事故应急救援和事故调查处理工作。",
+    "predicates":
+    [
+        "指示：Instruction(Leader, Regulation) ::: 表示领导发出的指示和相关规定。",
+        "参与：Participate(Inspector, Scene, Task) ::: 表示安全监察专员在事故现场参与某项任务。",
+        "赶赴：GoTo(Inspector, Scene) ::: 表示安全监察专员赶赴事故现场。",
+        "事故：Accident(Scene) ::: 表示发生在某个场景的事故。"
+    ],
+    "logicexpression":
+    [
+        "∀s ∀i ∀r (Accident(s) ∧ Instruction(Leader, r) → (GoTo(i, s) ∧ Participate(i, s, EmergencyRescue) ∧ Participate(i, s, Investigation)))"
+    ]
+}
+```
+###
+这条例子的谓词实例化的参数值，和将实例化参数代入逻辑表达式的输出如下：
+[
+    {
+        "instance_predicates": [
+            "s=“化工厂” — 表示事故场景在化工厂",
+            "i=“张三” — 表示安全监察专员为张三",
+            "r=“化工事故应急处理规定” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“化工厂”)∧Instruction(Leader, “化工事故应急处理规定”)→(GoTo(“张三”, “化工厂”)∧Participate(“张三”, “化工厂”, “应急救援”)∧Participate(“张三”, “化工厂”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“矿井” — 表示事故场景在矿井",
+            "i=“李四” — 表示安全监察专员为李四",
+            "r=“矿山安全生产规章” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“矿井”)∧Instruction(Leader, “矿山安全生产规章”)→(GoTo(“李四”, “矿井”)∧Participate(“李四”, “矿井”, “应急救援”)∧Participate(“李四”, “矿井”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“港口” — 表示事故场景在港口",
+            "i=“王五” — 表示安全监察专员为王五",
+            "r=“港口作业安全管理条例” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“港口”)∧Instruction(Leader, “港口作业安全管理条例”)→(GoTo(“王五”, “港口”)∧Participate(“王五”, “港口”, “应急救援”)∧Participate(“王五”, “港口”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“建筑工地” — 表示事故场景在建筑工地",
+            "i=“赵六” — 表示安全监察专员为赵六",
+            "r=“建筑施工安全规章” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“建筑工地”)∧Instruction(Leader, “建筑施工安全规章”)→(GoTo(“赵六”, “建筑工地”)∧Participate(“赵六”, “建筑工地”, “应急救援”)∧Participate(“赵六”, “建筑工地”, “调查”)))"
+        ]
+    },
+]
+------
+下面是一个例子：
+```json
+{
+    "rule": "善后处置的获救人员的处置：当地政府民政部门或获救人员所在单位负责获救人员的安置；港澳台或外籍人员，由当地政府港澳台办或外事办负责安置；外籍人员由公安部门或外交部门负责遣返。",
+    "predicates":
+    [
+        "负责安置：ResponsibleForSettlement(Department, Person) 表示某个部门负责某个获救人员的安置。",
+        "港澳台或外籍人员：PersonType(Person, Type) 表示某个人员是港澳台或外籍人员。",
+        "遣返：Deport(Person, Department) 表示某个部门负责遣返某个外籍人员。"
+    ],
+    "logicexpression":
+    [
+        "∀p (获救人员(p) → (¬港澳台或外籍人员(p) → ResponsibleForSettlement(民政部门, p) ∨ ResponsibleForSettlement(所在单位, p)))",
+        "∀p (港澳台或外籍人员(p, 港澳台) → ResponsibleForSettlement(港澳台办, p) ∨ ResponsibleForSettlement(外事办, p))",
+        "∀p (港澳台或外籍人员(p, 外籍) → Deport(p, 公安部门) ∨ Deport(p, 外交部门))"
+    ]
+}
+```
+###
+这条例子的谓词实例化的参数值，和将实例化参数代入逻辑表达式的输出如下：
+[
+    {
+        "instance_predicates": [
+            "p=“张三” — 张三为本地获救人员",
+            "部门：民政部门"
+        ],
+        "instance_logicexpression": [
+            "获救人员(张三)→(¬港澳台或外籍人员(张三)→ResponsibleForSettlement(民政部门, 张三))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“李四” — 李四为港澳台人员",
+            "部门：港澳台办"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(李四, 港澳台)→ResponsibleForSettlement(港澳台办, 李四)"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“John Smith” — John Smith为外籍获救人员",
+            "部门：外交部门"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(John Smith, 外籍)→Deport(John Smith, 外交部门)"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“小王” — 小王为本地获救人员，工作单位负责安置",
+            "部门：所在单位"
+        ],
+        "instance_logicexpression": [
+            "获救人员(小王)→(¬港澳台或外籍人员(小王)→ResponsibleForSettlement(所在单位, 小王))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“Maria” — Maria为外籍获救人员",
+            "部门：公安部门"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(Maria, 外籍)→Deport(Maria, 公安部门)"
+        ]
+    },
+]
+------
+下面就是你需要进行谓词实例化和代入逻辑表达式的：
+规则数据：
+[[RULES]]
+###

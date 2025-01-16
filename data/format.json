@@ -1,0 +1,16 @@
+[
+    {
+        "rule": "安全生产协调司的职责：根据安全监管总局领导指示和有关规定，组织协调安全监察专员赶赴事故现场参与事故应急救援和事故调查处理工作。",
+        "predicates":
+        [
+            "指示：Instruction(Leader, Regulation) ::: 表示领导发出的指示和相关规定。",
+            "参与：Participate(Inspector, Scene, Task) ::: 表示安全监察专员在事故现场参与某项任务。",
+            "赶赴：GoTo(Inspector, Scene) ::: 表示安全监察专员赶赴事故现场。",
+            "事故：Accident(Scene) ::: 表示发生在某个场景的事故。"
+        ],
+        "logicexpression":
+        [
+            "∀s ∀i ∀r (Accident(s) ∧ Instruction(Leader, r) → (GoTo(i, s) ∧ Participate(i, s, EmergencyRescue) ∧ Participate(i, s, Investigation)))"
+        ]
+    }
+]

@@ -1,0 +1,120 @@
+任务描述：你将被给予一个列表，列表每个元素是一条 JSON 格式的数据，包含：1. 谓词的描述和谓词的具体取值（instance_predicates）；2. 将这些具体取值的谓词代入逻辑表达式得到的表达式（instance_logicexpression）。你的任务是将实例化的逻辑表达式，转化为自然语言的形式。
+------
+下面是一个例子：
+```json
+[
+    {
+        "instance_predicates": [
+            "s=“化工厂” — 表示事故场景在化工厂",
+            "i=“张三” — 表示安全监察专员为张三",
+            "r=“化工事故应急处理规定” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“化工厂”)∧Instruction(Leader, “化工事故应急处理规定”)→(GoTo(“张三”, “化工厂”)∧Participate(“张三”, “化工厂”, “应急救援”)∧Participate(“张三”, “化工厂”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“矿井” — 表示事故场景在矿井",
+            "i=“李四” — 表示安全监察专员为李四",
+            "r=“矿山安全生产规章” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“矿井”)∧Instruction(Leader, “矿山安全生产规章”)→(GoTo(“李四”, “矿井”)∧Participate(“李四”, “矿井”, “应急救援”)∧Participate(“李四”, “矿井”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“港口” — 表示事故场景在港口",
+            "i=“王五” — 表示安全监察专员为王五",
+            "r=“港口作业安全管理条例” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“港口”)∧Instruction(Leader, “港口作业安全管理条例”)→(GoTo(“王五”, “港口”)∧Participate(“王五”, “港口”, “应急救援”)∧Participate(“王五”, “港口”, “调查”)))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "s=“建筑工地” — 表示事故场景在建筑工地",
+            "i=“赵六” — 表示安全监察专员为赵六",
+            "r=“建筑施工安全规章” — 表示领导发出的指示和相关规定"
+        ],
+        "instance_logicexpression": [
+            "∀s∀i∀r (Accident(“建筑工地”)∧Instruction(Leader, “建筑施工安全规章”)→(GoTo(“赵六”, “建筑工地”)∧Participate(“赵六”, “建筑工地”, “应急救援”)∧Participate(“赵六”, “建筑工地”, “调查”)))"
+        ]
+    },
+]
+```
+###
+翻译的自然语言输出如下：
+[
+    "在化工厂发生了事故。根据“化工事故应急处理规定”，领导发出了指示。安全监察专员张三接到指令，立即赶赴化工厂，参与现场的应急救援工作和事故调查。",
+    "矿井发生了一起事故。依据“矿山安全生产规章”，领导做出指示。安全监察专员李四接到指令后，前往矿井现场参与应急救援，并对事故进行调查。"，
+    "港口发生了安全事故。根据“港口作业安全管理条例”，领导发出指示，要求派出监察专员。王五作为安全监察专员，赶赴港口，参与应急救援，并协助事故调查工作。",
+    "在建筑工地发生了事故。按照“建筑施工安全规章”中的指示，领导决定派人前往事故现场。安全监察专员赵六接到指令后，迅速前往建筑工地，参与应急救援并进行事故调查。"
+]
+------
+下面是一个例子：
+```json
+[
+    {
+        "instance_predicates": [
+            "p=“张三” — 张三为本地获救人员",
+            "部门：民政部门"
+        ],
+        "instance_logicexpression": [
+            "获救人员(张三)→(¬港澳台或外籍人员(张三)→ResponsibleForSettlement(民政部门, 张三))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“李四” — 李四为港澳台人员",
+            "部门：港澳台办"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(李四, 港澳台)→ResponsibleForSettlement(港澳台办, 李四)"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“John Smith” — John Smith为外籍获救人员",
+            "部门：外交部门"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(John Smith, 外籍)→Deport(John Smith, 外交部门)"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“小王” — 小王为本地获救人员，工作单位负责安置",
+            "部门：所在单位"
+        ],
+        "instance_logicexpression": [
+            "获救人员(小王)→(¬港澳台或外籍人员(小王)→ResponsibleForSettlement(所在单位, 小王))"
+        ]
+    },
+    {
+        "instance_predicates": [
+            "p=“Maria” — Maria为外籍获救人员",
+            "部门：公安部门"
+        ],
+        "instance_logicexpression": [
+            "港澳台或外籍人员(Maria, 外籍)→Deport(Maria, 公安部门)"
+        ]
+    },
+]
+```
+###
+翻译的自然语言输出如下：
+[
+    "如果张三是获救人员，并且他不是港澳台或外籍人员，那么民政部门负责安置张三。",
+    "如果李四是港澳台人员，那么港澳台办负责安置李四。",
+    "如果 John Smith 是外籍人员，那么外交部门负责遣返他。",
+    "如果小王是获救人员，并且他不是港澳台或外籍人员，那么他所在的单位负责安置小王。",
+    "如果 Maria 是外籍人员，那么公安部门负责遣返她。"
+]
+------
+下面就是你需要进行逻辑表达式向自然语言翻译的：
+谓词与逻辑表达式：
+[[RULES]]
+###
