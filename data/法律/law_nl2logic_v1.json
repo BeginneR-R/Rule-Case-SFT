@@ -1,0 +1,10 @@
+[
+    {
+        "id": 0,
+        "judgement": "{\n    \"rule\": \"[[RULES]]\",\n    \"predicates\": [\n        \"放火罪：Arson(X) 表示X犯有放火罪。\",\n        \"决水罪：Flooding(X) 表示X犯有决水罪。\",\n        \"爆炸罪：Explosion(X) 表示X犯有爆炸罪。\",\n        \"投放危险物质罪：DangerousSubstance(X) 表示X犯有投放危险物质罪。\",\n        \"以危险方法危害公共安全罪：DangerousMethod(X) 表示X以危险方法危害公共安全。\",\n        \"处刑：Sentence(X, Years) 表示X被判处Years年有期徒刑。\"\n    ],\n    \"logicexpression\": [\n        \"∀X (Arson(X) ∨ Flooding(X) ∨ Explosion(X) ∨ DangerousSubstance(X) ∨ DangerousMethod(X) → ∃Years (3 ≤ Years ≤ 10 ∧ Sentence(X, Years)))\"\n    ]\n}"
+    },
+    {
+        "id": 1,
+        "judgement": "{\n    \"rule\": \"[[RULES]]\",\n    \"predicates\": [\n        \"放火罪：Arson(X) 表示X犯有放火罪。\",\n        \"决水罪：Flooding(X) 表示X犯有决水罪。\",\n        \"爆炸罪：Explosion(X) 表示X犯有爆炸罪。\",\n        \"投放危险物质罪：DangerousSubstance(X) 表示X犯有投放危险物质罪。\",\n        \"以危险方法危害公共安全罪：DangerousMethod(X) 表示X以危险方法危害公共安全。\",\n        \"处刑：Sentence(X, Years) 表示X被判处Years年有期徒刑。\"\n    ],\n    \"logicexpression\": [\n        \"∀X (Arson(X) ∨ Flooding(X) ∨ Explosion(X) ∨ DangerousSubstance(X) ∨ DangerousMethod(X) → Sentence(X, Years) ∧ 3 ≤ Years ∧ Years ≤ 10)\"\n    ]\n}"
+    }
+]
