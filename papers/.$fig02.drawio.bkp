@@ -114,7 +114,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="3" value="Step #2: Data Selection via Coverage" style="swimlane;whiteSpace=wrap" parent="1" vertex="1">
-          <mxGeometry x="445" y="128" width="280" height="570" as="geometry" />
+          <mxGeometry x="445" y="127" width="280" height="570" as="geometry" />
         </mxCell>
         <mxCell id="KYdN0kWGBJhBKMdRnncq-82" value="Coverage&lt;br&gt;&lt;b&gt;K-Greedy&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="3" vertex="1">
           <mxGeometry x="107" y="202" width="66" height="66" as="geometry" />
