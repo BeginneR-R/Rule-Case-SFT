@@ -145,14 +145,14 @@ def nl2logic(data_path, written_path):
     # 随机打乱列表
     random.shuffle(answer)
 
-    for idx, value in tqdm(enumerate(answer[303:]), total=len(answer), desc="Processing"):
+    for idx, value in tqdm(enumerate(answer), total=len(answer), desc="Processing"):
         # 使用缓存内容并添加问题
         context = value["rule"]
         question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
         response = use_cache_with_question(cache_id, question)
         judgement = {
             "ori_id": value["id"],
-            "id": idx + 303,
+            "id": idx,
             "rule": context,
             "answer": response
         }
@@ -161,5 +161,161 @@ def nl2logic(data_path, written_path):
             writer.write(judgement)
 
     return None
+
+
+# 对logic表达式通过gpt考虑覆盖率并填入具体取值
+def logic2coverage(data_path, written_path):
+    file_path = 'prompts/DataFountain/predicates_v2.txt'
+    file_content = load_file_content(file_path)
+    print(f"File{file_path} success read")
+    cache_id = create_cache(file_content)
+    print(f"cache id:{cache_id}")
+    print("cache cuccess")
+
+    # 检查缓存是否存在且未过期
+    if not check_cache(cache_id):
+        print("检查不到缓存")
+        # 重新加载数据并更新缓存
+        if reload_and_update_cache(file_path, cache_id):
+            print("缓存更新成功")
+        else:
+            print("缓存更新失败")
+
+    answer = []
+    with open(data_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            # 去掉行尾的换行符
+            line = line.strip()
+            # 解析 JSON 数据
+            data = json.loads(line)
+            answer.append(data)
+
+    # 随机打乱列表
+    random.shuffle(answer)
+
+    for idx, value in tqdm(enumerate(answer), total=len(answer), desc="Processing"):
+        # 使用缓存内容并添加问题
+        context = value["answer"]
+        question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}，rule对应的数据为{value['rule']}"
+        response = use_cache_with_question(cache_id, question)
+        judgement = {
+            "ori_id": value["ori_id"],
+            "id": idx,
+            "rule": value["rule"],
+            "answer": response
+        }
+        # 打开文件以进行写入，如果文件不存在，会创建文件
+        with jsonlines.open(written_path, mode='a') as writer:
+            writer.write(judgement)
+
+    return None
+
+
+# 对logic表达式转化为自然语言
+def coverage2nl(data_path, written_path):
+    file_path = 'prompts/DataFountain/nl.txt'
+    file_content = load_file_content(file_path)
+    print(f"File{file_path} success read")
+    cache_id = create_cache(file_content)
+    print(f"cache id:{cache_id}")
+    print("cache cuccess")
+
+    # 检查缓存是否存在且未过期
+    if not check_cache(cache_id):
+        print("检查不到缓存")
+        # 重新加载数据并更新缓存
+        if reload_and_update_cache(file_path, cache_id):
+            print("缓存更新成功")
+        else:
+            print("缓存更新失败")
+
+    print("缓存已存在")
+
+    with open(data_path, 'r', encoding='utf-8') as file:
+        # 逐行读取
+        answer = []
+        for line in file:
+            # 去掉行尾的换行符
+            line = line.strip()
+            # 解析 JSON 数据
+            line = json.loads(line)
+            answer.append(line)
+            
+
+    for idx, value in tqdm(enumerate(answer), total=len(answer), desc="Processing"):
+        context = value['answer']
+        # 使用缓存内容并添加问题
+        question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
+        response = use_cache_with_question(cache_id, question)
+        judgement = {
+            "ori_id": value["ori_id"],
+            "id": idx,
+            "rule": value['rule'],
+            "nl": response
+        }
+        # 打开文件以进行写入，如果文件不存在，会创建文件
+        with jsonlines.open(written_path, mode='a') as writer:
+            writer.write(judgement)
+
+    return None
+
+
+# 将自然语言转化为指令形式
+def nl2instruction(data_path, written_path):
+    # 主流程
+    file_path = 'prompts/DataFountain/instruction.txt'
+    file_content = load_file_content(file_path)
+    print(f"File{file_path} success read")
+    cache_id = create_cache(file_content)
+    print(f"cache id:{cache_id}")
+    print("cache cuccess")
+
+    # 检查缓存是否存在且未过期
+    if not check_cache(cache_id):
+        print("检查不到缓存")
+        # 重新加载数据并更新缓存
+        if reload_and_update_cache(file_path, cache_id):
+            print("缓存更新成功")
+        else:
+            print("缓存更新失败")
+
+    print("缓存已存在")
+
+    with open(data_path, 'r', encoding='utf-8') as file:
+        # 逐行读取
+        answer = []
+        for line in file:
+            # 去掉行尾的换行符
+            line = line.strip()
+            # 解析 JSON 数据
+            line = json.loads(line)
+            answer.append(line)
+
+    for idx, value in tqdm(enumerate(answer[19:]), total=len(answer), desc="Processing"):
+        try:
+            sentences = json.loads(value['nl'].translate(str.maketrans('“”‘’', '"\"\'\'')))
+            for sen in sentences:
+                context = json.dumps({
+                    "rule": value['rule'],
+                    "natural_language": sen
+                }, indent=4, ensure_ascii=False)
+                # 使用缓存内容并添加问题
+                question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
+                response = use_cache_with_question(cache_id, question)
+                judgement = {
+                    "ori_id": value["ori_id"],
+                    "id": idx + 19,
+                    "rule": value['rule'],
+                    "nl": sen,
+                    "instruction": response
+                }
+                # 打开文件以进行写入，如果文件不存在，会创建文件
+                with jsonlines.open(written_path, mode='a') as writer:
+                    writer.write(judgement)
+        except json.JSONDecodeError as e:
+            print(f"JSONDecodeError: {e}")
+            print(f"原始数据: {value['nl']}，第{idx}个")
+            continue
+
 
 
