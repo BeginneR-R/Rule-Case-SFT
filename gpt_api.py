@@ -95,7 +95,7 @@ def reload_and_update_cache(file_path, cache_id):
 
 
 # 使用缓存内容并添加问题
-def use_cache_with_question(cache_id, question):
+def use_cache_with_question(cache_id, question, max_tokens=8192):
     data = {
         "model": "moonshot-v1-32k",
         "messages": [
@@ -108,7 +108,7 @@ def use_cache_with_question(cache_id, question):
                 "content": question
             }
         ],
-        "max_tokens": 8192,
+        "max_tokens": max_tokens,
     }
     response = requests.post(
         url="https://api.moonshot.cn/v1/chat/completions",
@@ -243,19 +243,21 @@ def coverage2nl(data_path, written_path):
             
 
     for idx, value in tqdm(enumerate(answer), total=len(answer), desc="Processing"):
-        context = value['answer']
-        # 使用缓存内容并添加问题
-        question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
-        response = use_cache_with_question(cache_id, question)
-        judgement = {
-            "ori_id": value["ori_id"],
-            "id": idx,
-            "rule": value['rule'],
-            "nl": response
-        }
-        # 打开文件以进行写入，如果文件不存在，会创建文件
-        with jsonlines.open(written_path, mode='a') as writer:
-            writer.write(judgement)
+        context = json.loads(value['answer'])
+        for idx_d, i in enumerate(context):
+            # 使用缓存内容并添加问题
+            question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{i}"
+            response = use_cache_with_question(cache_id, question, 2048)
+            judgement = {
+                "ori_id": value["ori_id"],
+                "id": idx,
+                "idx_d": idx_d,
+                "rule": value['rule'],
+                "nl": response
+            }
+            # 打开文件以进行写入，如果文件不存在，会创建文件
+            with jsonlines.open(written_path, mode='a') as writer:
+                writer.write(judgement)
 
     return None
 

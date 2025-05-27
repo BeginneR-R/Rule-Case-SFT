@@ -31,10 +31,10 @@ written_path_04 = "data/DF/DF_step04.json"
 # nl2logic(data_path_01, written_path_01)
 
 # 执行step02：逻辑表达式根据覆盖率取值
-logic2coverage(data_path_02, written_path_02)
+# logic2coverage(data_path_02, written_path_02)
 
 # 执行step03：逻辑表达式转化为自然语言
-# coverage2nl(data_path_03, written_path_03)
+coverage2nl(data_path_03, written_path_03)
 
 # 执行step04：自然语言转化为指令
 # nl2instruction(data_path_04, written_path_04)
