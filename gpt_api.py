@@ -301,7 +301,7 @@ def nl2instruction(data_path, written_path):
         # 使用缓存内容并添加问题
         question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
         for i in range(5):
-            response = use_cache_with_question(cache_id, question)
+            response = use_cache_with_question(cache_id, question, 2048)
             try:
                 response_json = json.loads(response)
                 break
