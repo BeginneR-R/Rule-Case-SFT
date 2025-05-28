@@ -293,31 +293,32 @@ def nl2instruction(data_path, written_path):
             line = json.loads(line)
             answer.append(line)
 
-    for idx, value in tqdm(enumerate(answer[19:]), total=len(answer), desc="Processing"):
-        try:
-            sentences = json.loads(value['nl'].translate(str.maketrans('“”‘’', '"\"\'\'')))
-            for sen in sentences:
-                context = json.dumps({
-                    "rule": value['rule'],
-                    "natural_language": sen
-                }, indent=4, ensure_ascii=False)
-                # 使用缓存内容并添加问题
-                question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
-                response = use_cache_with_question(cache_id, question)
-                judgement = {
-                    "ori_id": value["ori_id"],
-                    "id": idx + 19,
-                    "rule": value['rule'],
-                    "nl": sen,
-                    "instruction": response
-                }
-                # 打开文件以进行写入，如果文件不存在，会创建文件
-                with jsonlines.open(written_path, mode='a') as writer:
-                    writer.write(judgement)
-        except json.JSONDecodeError as e:
-            print(f"JSONDecodeError: {e}")
-            print(f"原始数据: {value['nl']}，第{idx}个")
-            continue
+    for idx, value in tqdm(enumerate(answer), total=len(answer), desc="Processing"):
+        context = json.dumps({
+            "rule": value['rule'],
+            "natural_language": value['nl']
+        }, indent=4, ensure_ascii=False)
+        # 使用缓存内容并添加问题
+        question = f"请回答关于文件内容的问题，其中[[CONTEXT]]代表的数据为{context}"
+        for i in range(5):
+            response = use_cache_with_question(cache_id, question)
+            try:
+                response_json = json.loads(response)
+                break
+            except json.JSONDecodeError:
+                print(f"Error decoding JSON for idx {idx}, retrying...")
+                continue
+        judgement = {
+            "ori_id": value["ori_id"],
+            "id": idx,
+            "idx_d": value["idx_d"],
+            "rule": value['rule'],
+            "nl": value["nl"],
+            "instruction": response
+        }
+        # 打开文件以进行写入，如果文件不存在，会创建文件
+        with jsonlines.open(written_path, mode='a') as writer:
+            writer.write(judgement)
 
 
 
